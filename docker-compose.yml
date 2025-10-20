@@ -17,8 +17,8 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017/bank_app
       - SECRET_KEY=supersecretkey
-    ports:
-      - "5000:5000"
+    #ports:
+    #  - "5000:5000"
     depends_on:
       - mongo
 
@@ -30,8 +30,8 @@ services:
     environment:
       - MONGO_URI=mongodb://mongo:27017
       - PORT=4000
-    ports:
-      - "4000:4000"
+    #ports:
+    #  - "4000:4000"
     depends_on:
       - mongo
 
