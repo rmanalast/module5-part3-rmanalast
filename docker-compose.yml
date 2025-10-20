@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+
+  # 1. MongoDB
+  mongo:
+    image: mongo:6
+    restart: always
+    volumes:
+      - mongo_data:/data/db
+
+  # 2. Backend Python/Flask API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/bank_app
+      - SECRET_KEY=supersecretkey
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+
+  # 3. Transactions JavaScript microservice
+  transactions:
+    build:
+      context: ./transactions
+      dockerfile: Dockerfile
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - PORT=4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongo
+
+  # 4. Frontend static files
+  studentportfolio:
+    build:
+      context: ./studentportfolio
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+      - transactions
+
+  # 5. Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./studentportfolio:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+      - transactions
+      - studentportfolio
+
+volumes:
+  mongo_data:
